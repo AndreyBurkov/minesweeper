@@ -18,6 +18,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public Game createNewGame(Game game) {
         GameUtils.validateNewGameParameters(game);
+        GameUtils.generateField(game);
         return gameRepository.saveGame(game).orElseThrow(() -> new RuntimeException("Game was not created"));
     }
 

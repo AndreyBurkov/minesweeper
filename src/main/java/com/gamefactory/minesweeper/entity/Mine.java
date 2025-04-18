@@ -18,4 +18,12 @@ public class Mine {
         return y;
     }
 
+    @Override
+    public String toString() {
+        return "Mine{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
+    }
+
 }

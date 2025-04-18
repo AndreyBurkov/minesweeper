@@ -9,24 +9,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class GameUtils {
 
-    public static List<List<Character>> generateField(Game game) {
-        List<List<Character>> cells = game.getField().getCells();
-        for (int y = 0; y < game.getHeight(); y++) {
-            List<Character> row = new ArrayList<>();
-            for (int x = 0; x < game.getWidth(); x++) {
-                row.add(' ');
-            }
-            cells.add(row);
-        }
-        for (int i = 0; i <= game.getMinesCount(); i++) {
-            int x = ThreadLocalRandom.current().nextInt(0, game.getWidth());
-            int y = ThreadLocalRandom.current().nextInt(0, game.getHeight());
-            Mine mine = new Mine(x, y);
-            game.getField().getMines().add(mine);
-        }
-        return null;
-    }
-
     public static void validateNewGameParameters(Game game) {
         Integer height = game.getHeight();
         Integer width = game.getWidth();
@@ -42,6 +24,23 @@ public class GameUtils {
         }
         if (minesCount > height * width - 1) {
             throw new RuntimeException("mines_count cannot be more than height * width - 1");
+        }
+    }
+
+    public static void generateField(Game game) {
+        List<List<Character>> cells = game.getField().getCells();
+        for (int y = 0; y < game.getHeight(); y++) {
+            List<Character> row = new ArrayList<>();
+            for (int x = 0; x < game.getWidth(); x++) {
+                row.add(' ');
+            }
+            cells.add(row);
+        }
+        for (int i = 0; i < game.getMinesCount(); i++) {
+            int x = ThreadLocalRandom.current().nextInt(0, game.getWidth());
+            int y = ThreadLocalRandom.current().nextInt(0, game.getHeight());
+            Mine mine = new Mine(x, y);
+            game.getField().getMines().add(mine);
         }
     }
 

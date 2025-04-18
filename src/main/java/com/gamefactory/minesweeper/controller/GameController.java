@@ -25,7 +25,7 @@ public class GameController {
     }
 
     @ExceptionHandler(Exception.class)
-    ErrorMessage handleError(Exception e) {
+    public ErrorMessage handleError(Exception e) {
         return new ErrorMessage(e.getMessage());
     }
 
