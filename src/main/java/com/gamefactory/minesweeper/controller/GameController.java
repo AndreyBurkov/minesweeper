@@ -1,8 +1,10 @@
 package com.gamefactory.minesweeper.controller;
 
-import com.gamefactory.minesweeper.model.Game;
+import com.gamefactory.minesweeper.dto.ErrorMessage;
+import com.gamefactory.minesweeper.dto.GameDto;
+import com.gamefactory.minesweeper.entity.Game;
 import com.gamefactory.minesweeper.service.GameService;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,9 +18,15 @@ public class GameController {
     }
 
     @PostMapping("/new")
-    public ResponseEntity<Object> createNewGame(@RequestBody Game game) {
-        Game createdGame = gameService.createNewGame(game);
-        return ResponseEntity.ok(createdGame);
+    @ResponseStatus(HttpStatus.OK)
+    public GameDto createNewGame(@RequestBody GameDto gameDto) {
+        Game createdGame = gameService.createNewGame(gameDto.getGame());
+        return GameDto.of(createdGame);
+    }
+
+    @ExceptionHandler(Exception.class)
+    ErrorMessage handleError(Exception e) {
+        return new ErrorMessage(e.getMessage());
     }
 
 }

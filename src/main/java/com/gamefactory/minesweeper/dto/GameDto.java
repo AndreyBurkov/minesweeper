@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.gamefactory.minesweeper.model.Game;
+import com.gamefactory.minesweeper.entity.Game;
 
 import java.util.List;
 
@@ -18,8 +18,17 @@ public class GameDto {
         this.game = new Game();
     }
 
-    public GameDto(Game game) {
+    private GameDto(Game game) {
         this.game = game;
+    }
+
+    public static GameDto of(Game game) {
+        return new GameDto(game);
+    }
+
+    @JsonIgnore
+    public Game getGame() {
+        return game;
     }
 
     @JsonGetter("game_id")
@@ -58,7 +67,7 @@ public class GameDto {
     }
 
     public List<List<Character>> getField() {
-        return game.getField();
+        return game.getField().getCells();
     }
 
 }
