@@ -1,6 +1,7 @@
 package com.gamefactory.minesweeper.controller;
 
-import com.gamefactory.minesweeper.dto.ErrorMessage;
+import com.gamefactory.minesweeper.dto.GameTurnDto;
+import com.gamefactory.minesweeper.entity.ErrorMessage;
 import com.gamefactory.minesweeper.dto.GameDto;
 import com.gamefactory.minesweeper.entity.Game;
 import com.gamefactory.minesweeper.service.GameService;
@@ -24,7 +25,15 @@ public class GameController {
         return GameDto.of(createdGame);
     }
 
+    @PostMapping("/turn")
+    @ResponseStatus(HttpStatus.OK)
+    public GameDto makeTurn(@RequestBody GameTurnDto gameTurnDto) {
+        Game game = gameService.makeTurn(gameTurnDto.getGameTurn());
+        return GameDto.of(game);
+    }
+
     @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage handleError(Exception e) {
         return new ErrorMessage(e.getMessage());
     }

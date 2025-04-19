@@ -10,4 +10,6 @@ public interface GameRepository {
 
     Optional<Game> getGameById(String id);
 
+    void deleteGameById(String id);
+
 }

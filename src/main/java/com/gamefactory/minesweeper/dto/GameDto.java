@@ -26,7 +26,6 @@ public class GameDto {
         return new GameDto(game);
     }
 
-    @JsonIgnore
     public Game getGame() {
         return game;
     }

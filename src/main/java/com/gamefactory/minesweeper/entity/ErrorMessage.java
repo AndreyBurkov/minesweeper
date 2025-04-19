@@ -1,4 +1,4 @@
-package com.gamefactory.minesweeper.dto;
+package com.gamefactory.minesweeper.entity;
 
 public class ErrorMessage {
 
