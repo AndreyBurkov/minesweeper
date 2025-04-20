@@ -1,15 +1,15 @@
 package com.gamefactory.minesweeper.controller;
 
+import com.gamefactory.minesweeper.dto.GameDto;
 import com.gamefactory.minesweeper.dto.GameTurnDto;
 import com.gamefactory.minesweeper.entity.ErrorMessage;
-import com.gamefactory.minesweeper.dto.GameDto;
 import com.gamefactory.minesweeper.entity.Game;
 import com.gamefactory.minesweeper.service.GameService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class GameController {
 
     private final GameService gameService;
