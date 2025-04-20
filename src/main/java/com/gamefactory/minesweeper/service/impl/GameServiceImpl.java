@@ -8,7 +8,7 @@ import com.gamefactory.minesweeper.repository.GameRepository;
 import com.gamefactory.minesweeper.service.GameService;
 import com.gamefactory.minesweeper.utils.GameConstants;
 import com.gamefactory.minesweeper.utils.GameUtils;
-import com.gamefactory.minesweeper.utils.GameValidationUtils;
+import com.gamefactory.minesweeper.validator.GameValidator;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,16 +22,18 @@ public class GameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
     private final GameProperties gameProperties;
+    private final GameValidator gameValidator;
     private final Lock lock = new ReentrantLock();
 
-    public GameServiceImpl(GameRepository gameRepository, GameProperties gameProperties) {
+    public GameServiceImpl(GameRepository gameRepository, GameProperties gameProperties, GameValidator gameValidator) {
         this.gameRepository = gameRepository;
         this.gameProperties = gameProperties;
+        this.gameValidator = gameValidator;
     }
 
     @Override
     public Game createNewGame(Game game) {
-        GameValidationUtils.validateNewGameParameters(game);
+        gameValidator.validateNewGameParameters(game);
         GameUtils.generateGameField(game);
 
         lock.lock();
@@ -58,9 +60,9 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Game makeTurn(GameTurn gameTurn) {
-        GameValidationUtils.validateGameTurnMandatoryParameters(gameTurn);
+        gameValidator.validateGameTurnMandatoryParameters(gameTurn);
         Game game = getGameById(gameTurn.getGameId());
-        GameValidationUtils.validateGameTurnParameters(gameTurn, game);
+        gameValidator.validateGameTurnParameters(gameTurn, game);
         if (game.getCompleted()) {
             throw new RuntimeException("This game is already over: " + game);
         }

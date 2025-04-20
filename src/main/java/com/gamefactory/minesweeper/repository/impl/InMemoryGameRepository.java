@@ -1,8 +1,8 @@
 package com.gamefactory.minesweeper.repository.impl;
 
+import com.gamefactory.minesweeper.config.GameProperties;
 import com.gamefactory.minesweeper.entity.Game;
 import com.gamefactory.minesweeper.repository.GameRepository;
-import com.gamefactory.minesweeper.utils.GameConstants;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
@@ -17,6 +17,11 @@ public class InMemoryGameRepository implements GameRepository {
 
     private final ConcurrentHashMap<String, Game> games = new ConcurrentHashMap<>();
 
+    private final GameProperties gameProperties;
+
+    public InMemoryGameRepository(GameProperties gameProperties) {
+        this.gameProperties = gameProperties;
+    }
 
     @Override
     public Optional<Game> saveGame(Game game) {
@@ -43,7 +48,7 @@ public class InMemoryGameRepository implements GameRepository {
     public List<String> getGamesGameIdsToRemove() {
         return games.entrySet().stream()
                 .filter(entry -> Duration.between(entry.getValue().getCreatedAt(), LocalDateTime.now()).toMinutes()
-                        > GameConstants.MAX_GAME_DURATION_MINUTES || entry.getValue().getCompleted())
+                        > gameProperties.getMaxGameDurationMinutes() || entry.getValue().getCompleted())
                 .map(Map.Entry::getKey).toList();
     }
 
