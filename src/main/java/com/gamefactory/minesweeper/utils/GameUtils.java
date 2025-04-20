@@ -12,42 +12,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class GameUtils {
 
-    public static void validateNewGameParameters(Game game) {
-        Integer height = game.getHeight();
-        Integer width = game.getWidth();
-        Integer minesCount = game.getMinesCount();
-        if (height == null || width == null || minesCount == null) {
-            throw new RuntimeException("Parameters width, height, mines_count are mandatory");
-        }
-        if (height > GameConstants.MAX_FIELD_HEIGHT || height < GameConstants.MIN_FIELD_HEIGHT) {
-            throw new RuntimeException("Field height must be in [" + GameConstants.MIN_FIELD_HEIGHT + ", " + GameConstants.MAX_FIELD_HEIGHT + "]");
-        }
-        if (width > GameConstants.MAX_FIELD_WIDTH || width < GameConstants.MIN_FIELD_WIDTH) {
-            throw new RuntimeException("Field width must be in [" + GameConstants.MIN_FIELD_WIDTH + ", " + GameConstants.MAX_FIELD_WIDTH + "]");
-        }
-        if (minesCount > height * width - 1) {
-            throw new RuntimeException("mines_count cannot be more than height * width - 1");
-        }
-    }
-
-    public static void validateGameTurnMandatoryParameters(GameTurn gameTurn) {
-        if (gameTurn.getGameId() == null || gameTurn.getGameId().isEmpty()
-                || gameTurn.getCol() == null || gameTurn.getRow() == null) {
-            throw new RuntimeException("game_id, col, row cannot be empty");
-        }
-    }
-
-    public static void validateGameTurnParameters(GameTurn gameTurn, Game game) {
-        Integer col = gameTurn.getCol();
-        Integer row = gameTurn.getRow();
-        if (col < 0 || col >= game.getWidth()) {
-            throw new RuntimeException("col must be in bounds: [0;" + game.getWidth() + ")");
-        }
-        if (row < 0 || row >= game.getHeight()) {
-            throw new RuntimeException("row must be in bounds: [0;" + game.getHeight() + ")");
-        }
-    }
-
     public static void generateGameField(Game game) {
         List<List<Character>> cells = game.getField().getCells();
         List<Cell> allMines = new ArrayList<>(game.getHeight() * game.getWidth());
@@ -63,29 +27,11 @@ public class GameUtils {
             int randomIndex = ThreadLocalRandom.current().nextInt(0, allMines.size());
             game.getField().getMines().add(allMines.remove(randomIndex));
         }
-
-        //TODO: delete
-        System.out.println("\n\n");
-        List<Cell> mines_temp = game.getField().getMines();
-        System.out.println("\n" + mines_temp + "\n");
-        for (int y = 0; y < game.getHeight(); y++) {
-            for (int x = 0; x < game.getWidth(); x++) {
-                Cell tempCell = new Cell(x, y);
-                if (mines_temp.contains(tempCell)) {
-                    System.out.print("X");
-                } else {
-                    System.out.print(".");
-                }
-            }
-            System.out.println();
-        }
-
-        System.out.println();
     }
 
-    public static List<Cell> fillCellValue(Game game, Cell cell, List<Cell> cellsNotToProcess) {
+    public static void fillCellValue(Game game, Cell cell, List<Cell> cellsNotToProcess) {
         if (cellsNotToProcess.contains(cell)) {
-            return cellsNotToProcess;
+            return;
         }
         cellsNotToProcess.add(cell);
 
@@ -102,7 +48,7 @@ public class GameUtils {
 
         if (minesAround.size() > 0) {
             field.setCellCharValue(x, y, (char) (GameConstants.ZERO_MINE_CHAR + minesAround.size()));
-            return cellsNotToProcess;
+            return;
         }
 
         field.setCellCharValue(x, y, GameConstants.ZERO_MINE_CHAR);
@@ -113,17 +59,14 @@ public class GameUtils {
             }
             fillCellValue(game, nearCell, cellsNotToProcess);
         }
-        return cellsNotToProcess;
     }
 
     public static Optional<Cell> getMineForCell(GameTurn gameTurn, Game game) {
-        return getMineForCell(game.getField().getMines(), gameTurn.getCol(), gameTurn.getRow());
-    }
-
-    private static Optional<Cell> getMineForCell(List<Cell> mines, Integer x, Integer y) {
+        List<Cell> mines = game.getField().getMines();
+        Integer x = gameTurn.getCol();
+        Integer y = gameTurn.getRow();
         return mines.stream().filter(mine -> mine.getX().equals(x) && mine.getY().equals(y)).findFirst();
     }
-
 
     private static List<Cell> getCellsAround(Integer x, Integer y, Integer xMax, Integer yMax) {
         List<Cell> cells = new ArrayList<>();

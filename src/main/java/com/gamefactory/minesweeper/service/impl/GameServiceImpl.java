@@ -1,5 +1,6 @@
 package com.gamefactory.minesweeper.service.impl;
 
+import com.gamefactory.minesweeper.config.GameProperties;
 import com.gamefactory.minesweeper.entity.Cell;
 import com.gamefactory.minesweeper.entity.Game;
 import com.gamefactory.minesweeper.entity.GameTurn;
@@ -7,25 +8,47 @@ import com.gamefactory.minesweeper.repository.GameRepository;
 import com.gamefactory.minesweeper.service.GameService;
 import com.gamefactory.minesweeper.utils.GameConstants;
 import com.gamefactory.minesweeper.utils.GameUtils;
+import com.gamefactory.minesweeper.utils.GameValidationUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 public class GameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
+    private final GameProperties gameProperties;
+    private final Lock lock = new ReentrantLock();
 
-    public GameServiceImpl(GameRepository gameRepository) {
+    public GameServiceImpl(GameRepository gameRepository, GameProperties gameProperties) {
         this.gameRepository = gameRepository;
+        this.gameProperties = gameProperties;
     }
 
     @Override
     public Game createNewGame(Game game) {
-        GameUtils.validateNewGameParameters(game);
+        GameValidationUtils.validateNewGameParameters(game);
         GameUtils.generateGameField(game);
-        return gameRepository.saveGame(game).orElseThrow(() -> new RuntimeException("Game was not created"));
+
+        lock.lock();
+        try {
+            if (gameRepository.getGamesCount() > gameProperties.getMaxGamesCount()) {
+                List<String> gameIdsToRemove = gameRepository.getGamesGameIdsToRemove();
+                if (gameIdsToRemove.size() > 0) {
+                    gameIdsToRemove.forEach(gameRepository::deleteGameById);
+                } else {
+                    throw new RuntimeException("Games are limited by count " + gameProperties.getMaxGamesCount()
+                            + " and by " + gameProperties.getMaxGameDurationMinutes() + " minutes. Please try later");
+                }
+            }
+            return gameRepository.saveGame(game).orElseThrow(() -> new RuntimeException("Game was not created"));
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -35,11 +58,9 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Game makeTurn(GameTurn gameTurn) {
-        //TODO: delete
-        System.out.println("turn: {" + gameTurn.getCol() + ", " + gameTurn.getRow() + "}");
-        GameUtils.validateGameTurnMandatoryParameters(gameTurn);
+        GameValidationUtils.validateGameTurnMandatoryParameters(gameTurn);
         Game game = getGameById(gameTurn.getGameId());
-        GameUtils.validateGameTurnParameters(gameTurn, game);
+        GameValidationUtils.validateGameTurnParameters(gameTurn, game);
         if (game.getCompleted()) {
             throw new RuntimeException("This game is already over: " + game);
         }
@@ -55,15 +76,12 @@ public class GameServiceImpl implements GameService {
         Cell cell = new Cell(gameTurn.getCol(), gameTurn.getRow());
         GameUtils.fillCellValue(game, cell, new ArrayList<>());
 
-
         if (game.getField().getMines().size() == game.getField().getCountNotOpenedFields()) {
             GameUtils.fillEntireFieldWithMineValue(game, GameConstants.WIN_MINE_CHAR);
             game.setCompleted(true);
             gameRepository.deleteGameById(game.getGameId());
             return game;
         }
-
-
         return game;
     }
 

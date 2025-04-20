@@ -1,9 +1,11 @@
 package com.gamefactory.minesweeper.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.gamefactory.minesweeper.entity.GameTurn;
 
+@JsonPropertyOrder({"game_id", "col", "row"})
 public class GameTurnDto {
 
     @JsonIgnore

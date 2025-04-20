@@ -1,0 +1,9 @@
+server:
+  port: 8080
+
+minesweeper:
+  game:
+    max-games-count: ${MAX_GAMES_COUNT:1000}
+    max-game-duration-minutes: ${MAX_GAME_DURATION_MINUTES:30}
+    max-field-height: ${MAX_FIELD_HEIGHT:30}
+    max-field-width: ${MAX_FIELD_WIDTH:30}
